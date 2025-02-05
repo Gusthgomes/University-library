@@ -15,9 +15,13 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { toast } from "@/hooks/use-toast";
+
 import Link from 'next/link';
 import { FIELD_NAMES, FIELD_TYPES } from '@/constants';
 import ImageUpload from './ImageUpload';
+
+import { useRouter } from "next/navigation";
 
 interface Props<T extends FieldValues> {
     schema: ZodType<T>;
@@ -31,13 +35,32 @@ const AuthForm = <T extends FieldValues>({ type, schema, defaultValues, onSubmit
 
     const isSignIn = type === 'SIGN_IN'
 
+    const router = useRouter();
+
     const form: UseFormReturn<T> = useForm({
         resolver: zodResolver(schema),
         defaultValues: defaultValues as DefaultValues<T>,
     })
 
     const handleSubmit: SubmitHandler<T> = async (data) => {
+        const result = await onSubmit(data);
 
+        if (result.success) {
+            toast({
+                title: "Success",
+                description: isSignIn
+                    ? "Você logou com sucesso!"
+                    : "Sua conta foi criada com sucesso!",
+            });
+
+            router.push("/");
+        } else {
+            toast({
+                title: `Error ${isSignIn ? "signing in" : "signing up"}`,
+                description: result.error ?? "Ops! Algo deu errado!",
+                variant: "destructive",
+            });
+        }
     }
     return (
         <div className='flex flex-col gap-4'>
