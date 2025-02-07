@@ -3,16 +3,22 @@ import Image from 'next/image'
 import { Button } from './ui/button'
 import BookCover from './BookCover'
 
+interface Props extends Book {
+    userId: string;
+}
+
 const BookOverview = ({
     title,
     author,
     genre,
     rating,
-    total_copies,
-    available_copies,
+    totalCopies,
+    availableCopies,
     description,
-    color,
-    cover }: Book) => {
+    coverColor,
+    coverUrl,
+    id,
+    userId }: Props) => {
     return (
         <section className='book-overview'>
             <div className="flex flex-1 flex-col gap-5">
@@ -35,11 +41,11 @@ const BookOverview = ({
 
                 <div className='book-copies'>
                     <p>
-                        Total de livros: <span>{total_copies}</span>
+                        Total de livros: <span>{totalCopies}</span>
                     </p>
 
                     <p>
-                        Cópias disponíveis: <span>{available_copies}</span>
+                        Cópias disponíveis: <span>{availableCopies}</span>
                     </p>
                 </div>
 
@@ -56,15 +62,15 @@ const BookOverview = ({
                     <BookCover
                         variant="wide"
                         className='z-10'
-                        coverColor={color}
-                        coverImage={cover}
+                        coverColor={coverColor}
+                        coverImage={coverUrl}
                     />
 
                     <div className='absolute left-16 top-10 rotate-12 opacity-40 max-sm:hidden'>
                         <BookCover
                             variant="wide"
-                            coverColor={color}
-                            coverImage={cover}
+                            coverColor={coverColor}
+                            coverImage={coverUrl}
                         />
                     </div>
                 </div>
