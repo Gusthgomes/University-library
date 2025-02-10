@@ -54,7 +54,7 @@ const BookForm = ({ type, ...book }: Props) => {
                 description: "Livro cadastrado com sucesso!",
             });
 
-            router.push(`/admin/books/${result.data.id}`);
+            router.push("/");
         } else {
             toast({
                 title: "Oops! Algo deu errado.",
