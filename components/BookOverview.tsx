@@ -1,13 +1,15 @@
-import React from 'react'
-import Image from 'next/image'
-import { Button } from './ui/button'
-import BookCover from './BookCover'
+import React from "react";
+import Image from "next/image";
+import BookCover from "@/components/BookCover";
+import BorrowBook from "@/components/BorrowBook";
+import { db } from "@/database/drizzle";
+import { users } from "@/database/schema";
+import { eq } from "drizzle-orm";
 
 interface Props extends Book {
     userId: string;
 }
-
-const BookOverview = ({
+const BookOverview = async ({
     title,
     author,
     genre,
@@ -18,55 +20,73 @@ const BookOverview = ({
     coverColor,
     coverUrl,
     id,
-    userId }: Props) => {
+    userId,
+}: Props) => {
+    const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+    const borrowingEligibility = {
+        isEligible: availableCopies > 0 && user?.status === "APPROVED",
+        message:
+            availableCopies <= 0
+                ? "Book is not available"
+                : "You are not eligible to borrow this book",
+    };
     return (
-        <section className='book-overview'>
+        <section className="book-overview">
             <div className="flex flex-1 flex-col gap-5">
-                <h1> {title} </h1>
+                <h1>{title}</h1>
 
-                <div className='book-info'>
+                <div className="book-info">
                     <p>
-                        por <span className='font-semibold text-light-200'> {author}</span>
+                        Por <span className="font-semibold text-light-200">{author}</span>
                     </p>
 
                     <p>
-                        Categoria <span className='font-semibold text-light-200'> {genre}</span>
+                        Categoria{" "}
+                        <span className="font-semibold text-light-200">{genre}</span>
                     </p>
 
-                    <div className='flex flex-row gap-1'>
+                    <div className="flex flex-row gap-1">
                         <Image src="/icons/star.svg" alt="star" width={22} height={22} />
-                        <p> {rating} </p>
+                        <p>{rating}</p>
                     </div>
                 </div>
 
-                <div className='book-copies'>
+                <div className="book-copies">
                     <p>
-                        Total de livros: <span>{totalCopies}</span>
+                        Total de livros <span>{totalCopies}</span>
                     </p>
 
                     <p>
-                        Cópias disponíveis: <span>{availableCopies}</span>
+                        Cópias disponíveis <span>{availableCopies}</span>
                     </p>
                 </div>
 
-                <p className='book-description'>{description}</p>
+                <p className="book-description">{description}</p>
 
-                <Button className='book-overview_btn'>
-                    <Image src="/icons/book.svg" alt="book" width={20} height={20} />
-                    <p className='font-bebas-neue text-xl text-dark-100'> Emprestar </p>
-                </Button>
+                {user && (
+                    <BorrowBook
+                        bookId={id}
+                        userId={userId}
+                        borrowingEligibility={borrowingEligibility}
+                    />
+                )}
             </div>
 
-            <div className='relative flex flex-1 justify-center'>
-                <div className='relative'>
+            <div className="relative flex flex-1 justify-center">
+                <div className="relative">
                     <BookCover
                         variant="wide"
-                        className='z-10'
+                        className="z-10"
                         coverColor={coverColor}
                         coverImage={coverUrl}
                     />
 
-                    <div className='absolute left-16 top-10 rotate-12 opacity-40 max-sm:hidden'>
+                    <div className="absolute left-16 top-10 rotate-12 opacity-40 max-sm:hidden">
                         <BookCover
                             variant="wide"
                             coverColor={coverColor}
@@ -75,9 +95,8 @@ const BookOverview = ({
                     </div>
                 </div>
             </div>
-
         </section>
-    )
-}
+    );
+};
 
-export default BookOverview
+export default BookOverview;
